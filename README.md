@@ -4,7 +4,21 @@
 
 博客采用**"编辑风格粗野主义"（Editorial Brutalist）**设计美学，具有独特的排版和视觉元素。
 
-![Blog Preview](./.github/preview.png)
+![Blog Preview](./.github/images/home.png)
+
+## 页面预览
+
+| 首页 (深色主题) | 首页 (浅色主题) |
+|----------------|----------------|
+| ![Home Dark](./.github/images/home.png) | ![Home Light](./.github/images/home-light.png) |
+
+| 文章详情页 | 关于页面 |
+|----------|---------|
+| ![Post](./.github/images/post.png) | ![About](./.github/images/about.png) |
+
+| 归档页面 | 404 页面 |
+|---------|---------|
+| ![Archive](./.github/images/archive.png) | ![404](./.github/images/404.png) |
 
 ## 在线演示
 
