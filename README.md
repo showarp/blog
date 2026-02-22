@@ -8,7 +8,11 @@
 
 ## 在线演示
 
-访问：[https://your-blog.vercel.app](https://your-blog.vercel.app)
+访问：[https://blog-nine-orcin-81.vercel.app](https://blog-nine-orcin-81.vercel.app)
+
+## 仓库
+
+GitHub: [https://github.com/showarp/blog](https://github.com/showarp/blog)
 
 ## 特性
 
@@ -169,7 +173,7 @@ npm run lint     # 运行 ESLint 检查
 
 ### 方式一：一键部署
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/your-blog)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/showarp/blog)
 
 ### 方式二：手动部署
 
