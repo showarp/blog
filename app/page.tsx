@@ -1,65 +1,183 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Post } from '@/types';
+import { formatDate } from '@/lib/utils';
 
 export default function Home() {
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // 首次加载时获取所有数据
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        const [postsRes, tagsRes, categoriesRes] = await Promise.all([
+          fetch('/api/posts'),
+          fetch('/api/tags'),
+          fetch('/api/categories'),
+        ]);
+
+        const postsData = await postsRes.json();
+        const tagsData = await tagsRes.json();
+        const categoriesData = await categoriesRes.json();
+
+        setAllPosts(postsData.posts || []);
+        setAllTags(tagsData.tags || []);
+        setAllCategories(categoriesData.categories || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // 本地过滤搜索
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter((post) => {
+      // Tag 过滤
+      if (selectedTag && !post.tags.includes(selectedTag)) {
+        return false;
+      }
+
+      // Category 过滤
+      if (selectedCategory && post.category !== selectedCategory) {
+        return false;
+      }
+
+      // 搜索过滤
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchTitle = post.title.toLowerCase().includes(query);
+        const matchSummary = post.summary?.toLowerCase().includes(query);
+        if (!matchTitle && !matchSummary) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allPosts, selectedTag, selectedCategory, searchQuery]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="container">
+      {/* Hero Section */}
+      <section className="home-hero">
+        <div className="home-hero-content">
+          <p className="home-hero-eyebrow animate-fade-in">Technical Blog</p>
+          <h1 className="home-hero-title animate-fade-in-up">
+            Thoughts on <span className="accent">code</span>,
+            <br />
+            design & everything in between.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="home-hero-subtitle animate-fade-in-up">
+            Exploring software development, one article at a time.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="home-hero-decoration home-hero-decoration-1" />
+        <div className="home-hero-decoration home-hero-decoration-2" />
+      </section>
+
+      {/* Search & Filters */}
+      <section className="filters-section">
+        <div className="home-search-wrapper animate-fade-in-up">
+          <svg className="home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            className="home-search-input"
+            placeholder="Search articles..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-      </main>
+
+        {allTags.length > 0 && (
+          <div className="home-tags-wrapper animate-fade-in-up">
+            <span className="home-filter-label">Tags:</span>
+            <div className="home-tags-list">
+              <button className={`tag ${selectedTag === null ? 'active' : ''}`} onClick={() => setSelectedTag(null)}>All</button>
+              {allTags.map((tag) => (
+                <button key={tag} className={`tag ${selectedTag === tag ? 'active' : ''}`} onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}>{tag}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {allCategories.length > 0 && (
+          <div className="home-categories-wrapper animate-fade-in-up">
+            <span className="home-filter-label">Category:</span>
+            <div className="home-categories-list">
+              <button className={`category-btn ${selectedCategory === null ? 'active' : ''}`} onClick={() => setSelectedCategory(null)}>All</button>
+              {allCategories.map((category) => (
+                <button key={category} className={`category-btn ${selectedCategory === category ? 'active' : ''}`} onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}>{category}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Posts Grid */}
+      <section className="home-posts-section">
+        {loading ? (
+          <div className="home-loading-wrapper">
+            <div className="loading-spinner" />
+            <p>Loading articles...</p>
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="home-empty-state animate-fade-in">
+            <p className="home-empty-title">No articles found</p>
+            <p className="home-empty-subtitle">
+              {searchQuery || selectedTag || selectedCategory ? 'Try adjusting your filters' : 'Add some posts to your Notion database to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="home-posts-grid stagger-children">
+            {filteredPosts.map((post) => (
+              <Link key={post.id} href={`/post/${post.slug}`} className="post-card">
+                {post.cover && (
+                  <div className="post-cover">
+                    <Image src={post.cover} alt={post.title} fill unoptimized />
+                  </div>
+                )}
+                <div className="post-content">
+                  <div className="post-meta">
+                    {post.date && <span className="post-date">{formatDate(post.date)}</span>}
+                    {post.category && (
+                      <>
+                        <span className="post-separator">/</span>
+                        <span className="post-category">{post.category}</span>
+                      </>
+                    )}
+                  </div>
+                  <h2 className="post-card-title">{post.title}</h2>
+                  {post.summary && <p className="post-summary">{post.summary}</p>}
+                  {post.tags.length > 0 && (
+                    <div className="post-tags">
+                      {post.tags.map((tag) => (
+                        <span key={tag} className="post-tag">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
