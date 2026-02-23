@@ -247,15 +247,26 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   background: var(--bg-tertiary);
-  border: 1px solid var(--border);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .tag:hover, .tag.active {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Tag styles for light theme */
+[data-theme="light"] .tag {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .tag:hover,
+[data-theme="light"] .tag.active {
+  background: var(--accent);
+  color: var(--bg-primary);
 }
 
 /* Card styles */
@@ -312,9 +323,40 @@ a:hover {
 
 /* Hero */
 .home-hero {
+  min-height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: 80px 0 60px;
   overflow: hidden;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  animation: bounce 2s infinite;
+  z-index: 10;
+}
+
+.scroll-indicator svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--accent);
+}
+
+.scroll-indicator:hover {
+  opacity: 0.8;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
 }
 
 .home-hero-content {
@@ -634,7 +676,26 @@ a:hover {
 .post-tag {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  padding: 4px 10px;
+  transition: all 0.2s ease;
+}
+
+.post-tag:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Post tag styles for light theme */
+[data-theme="light"] .post-tag {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .post-tag:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
 }
 
 @media (max-width: 768px) {
@@ -1221,7 +1282,28 @@ div.mermaid-lightbox-content svg {
   color: var(--accent);
   background: rgba(232, 255, 71, 0.1);
   padding: 4px 12px;
-  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.post-tag:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Post tag styles for light theme - article page */
+[data-theme="light"] .post-tag {
+  background: rgba(37, 99, 235, 0.15);
+  color: #1e40af;
+}
+
+[data-theme="light"] .post-tag:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+[data-theme="light"] .post-tag:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
 }
 
 /* Post content wrapper with sidebar */

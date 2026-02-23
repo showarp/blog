@@ -1,12 +1,19 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 export default function HomeClient() {
+  // 滚动到文章区域
+  const scrollToPosts = useCallback(() => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth',
+    });
+  }, []);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>([]);
@@ -87,6 +94,13 @@ export default function HomeClient() {
         </div>
         <div className="home-hero-decoration home-hero-decoration-1" />
         <div className="home-hero-decoration home-hero-decoration-2" />
+
+        {/* Scroll Indicator */}
+        <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
+        </div>
       </section>
 
       {/* Search & Filters */}
