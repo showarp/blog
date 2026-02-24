@@ -441,6 +441,7 @@ a:hover {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
+  scroll-margin-top: var(--header-height);
 }
 
 [data-theme="light"] .filters-section {

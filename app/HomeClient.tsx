@@ -10,10 +10,13 @@ import LiquidGradient from '@/components/LiquidGradient';
 export default function HomeClient() {
   // 滚动到文章区域
   const scrollToPosts = useCallback(() => {
-    window.scrollTo({
-      top: window.innerHeight - 80,
-      behavior: 'smooth',
-    });
+    const filtersSection = document.querySelector('.filters-section');
+    if (filtersSection) {
+      filtersSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   }, []);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
