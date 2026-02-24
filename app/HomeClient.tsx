@@ -97,13 +97,13 @@ export default function HomeClient() {
           </div>
           <div className="home-hero-decoration home-hero-decoration-1" />
           <div className="home-hero-decoration home-hero-decoration-2" />
+        </div>
 
-          {/* Scroll Indicator */}
-          <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </div>
+        {/* Scroll Indicator - outside container, fixed to viewport */}
+        <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
         </div>
       </section>
 

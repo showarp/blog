@@ -344,8 +344,8 @@ a:hover {
 
 /* Scroll Indicator */
 .scroll-indicator {
-  position: absolute;
-  bottom: 220px;  /* Adjusted for better visibility */
+  position: fixed;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
   cursor: pointer;
