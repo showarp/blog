@@ -183,6 +183,13 @@ a:hover {
 .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
 .stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
 
+/* Stagger items for animejs - initial state */
+.home-posts-grid .stagger-item {
+  opacity: 0;
+  transform: translateY(40px);
+  will-change: opacity, transform;
+}
+
 /* Button styles */
 .btn {
   display: inline-flex;
@@ -593,7 +600,8 @@ a:hover {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, border-color;
 }
 
 [data-theme="light"] .post-card {
@@ -601,8 +609,13 @@ a:hover {
 }
 
 .post-card:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-4px);
+  border-color: var(--accent);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .post-card:hover {
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
 }
 
 .post-cover {
@@ -1287,6 +1300,126 @@ a:not(.logo):not(.nav-link):hover::after {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ==================== ANIMEJS ANIMATIONS ==================== */
+
+/* Animated text characters */
+.animated-text .char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Ripple effect container */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.3;
+  pointer-events: none;
+  transform: scale(0);
+}
+
+/* Scroll reveal utility */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced button with spring effect */
+.btn-spring {
+  transition: transform 0.2s ease;
+}
+
+.btn-spring:hover {
+  transform: scale(1.02);
+}
+
+.btn-spring:active {
+  transform: scale(0.98);
+}
+
+/* Stagger animation utility */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Glow effect */
+.glow-on-hover {
+  position: relative;
+}
+
+.glow-on-hover::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow-on-hover:hover::after {
+  opacity: 0.3;
+}
+
+/* Slide up animation */
+.slide-up {
+  animation: slideUp 0.6s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse animation */
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Floating animation */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 

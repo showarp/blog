@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
@@ -8,6 +8,8 @@ import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
 import Header from '@/components/Header';
 import { useFilter } from '@/contexts/FilterContext';
+import { useStaggerAnimation } from '@/lib/animations';
+import { animate } from 'animejs';
 
 interface HomeClientProps {
   tags: string[];
@@ -16,8 +18,18 @@ interface HomeClientProps {
 
 export default function HomeClient({ tags, categories }: HomeClientProps) {
   const { searchQuery, selectedTag, selectedCategory } = useFilter();
+  const heroRef = useRef<HTMLElement>(null);
+  const postsRef = useRef<HTMLElement>(null);
 
-  // 滚动到文章区域
+  // Stagger animation for post cards
+  const { containerRef: postsContainer } = useStaggerAnimation('.post-card', {
+    delay: 100,
+    duration: 600,
+    offsetY: 40,
+    trigger: 'scroll',
+  });
+
+  // Scroll to posts section
   const scrollToPosts = useCallback(() => {
     const postsSection = document.querySelector('.home-posts-section');
     if (postsSection) {
@@ -31,7 +43,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 首次加载时获取所有数据
+  // Fetch posts on mount
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
@@ -49,20 +61,45 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
     fetchInitialData();
   }, []);
 
-  // 本地过滤搜索
+  // Animate hero content on mount
+  useEffect(() => {
+    const eyebrow = document.querySelector('.home-hero-eyebrow');
+    const title = document.querySelector('.home-hero-title');
+    const subtitle = document.querySelector('.home-hero-subtitle');
+    const arrow = document.querySelector('.scroll-indicator');
+
+    if (eyebrow && title && subtitle) {
+      animate([eyebrow, title, subtitle], {
+        opacity: [0, 1],
+        translateY: [30, 0],
+        delay: animate.stagger(150, { start: 200 }),
+        duration: 1000,
+        easing: 'easeOutExpo',
+      });
+    }
+
+    if (arrow) {
+      animate(arrow, {
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: 1000,
+        duration: 800,
+        easing: 'easeOutExpo',
+      });
+    }
+  }, []);
+
+  // Filtered posts
   const filteredPosts = useMemo(() => {
     return allPosts.filter((post) => {
-      // Tag 过滤
       if (selectedTag && !post.tags.includes(selectedTag)) {
         return false;
       }
 
-      // Category 过滤
       if (selectedCategory && post.category !== selectedCategory) {
         return false;
       }
 
-      // 搜索过滤
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchTitle = post.title.toLowerCase().includes(query);
@@ -81,18 +118,18 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
       {/* Header with integrated filters */}
       <Header tags={tags} categories={categories} />
 
-      {/* Hero Section - full viewport width, outside container */}
-      <section className="home-hero">
+      {/* Hero Section */}
+      <section ref={heroRef} className="home-hero">
         <LiquidGradient />
         <div className="container home-hero-content-wrapper">
           <div className="home-hero-content">
-            <p className="home-hero-eyebrow animate-fade-in">Technical Blog</p>
-            <h1 className="home-hero-title animate-fade-in-up">
+            <p className="home-hero-eyebrow">Technical Blog</p>
+            <h1 className="home-hero-title">
               Thoughts on <span className="accent">code</span>,
               <br />
               design & everything in between.
             </h1>
-            <p className="home-hero-subtitle animate-fade-in-up">
+            <p className="home-hero-subtitle">
               Exploring software development, one article at a time.
             </p>
           </div>
@@ -100,7 +137,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
           <div className="home-hero-decoration home-hero-decoration-2" />
         </div>
 
-        {/* Scroll Indicator - outside container, fixed to viewport */}
+        {/* Scroll Indicator */}
         <div
           className="scroll-indicator"
           onClick={scrollToPosts}
@@ -115,17 +152,16 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
         </div>
       </section>
 
-      {/* Rest of content in container */}
+      {/* Content */}
       <div className="container">
-        {/* Posts Grid */}
-        <section className="home-posts-section">
+        <section ref={postsRef} className="home-posts-section">
           {loading ? (
             <div className="home-loading-wrapper">
               <div className="loading-spinner" />
               <p>Loading articles...</p>
             </div>
           ) : filteredPosts.length === 0 ? (
-            <div className="home-empty-state animate-fade-in">
+            <div className="home-empty-state">
               <p className="home-empty-title">No articles found</p>
               <p className="home-empty-subtitle">
                 {searchQuery || selectedTag || selectedCategory
@@ -134,9 +170,13 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
               </p>
             </div>
           ) : (
-            <div className="home-posts-grid stagger-children">
+            <div ref={postsContainer} className="home-posts-grid">
               {filteredPosts.map((post) => (
-                <Link key={post.id} href={`/post/${post.slug}`} className="post-card">
+                <Link
+                  key={post.id}
+                  href={`/post/${post.slug}`}
+                  className="post-card stagger-item"
+                >
                   {post.cover && (
                     <div className="post-cover">
                       <Image src={post.cover} alt={post.title} fill unoptimized />
