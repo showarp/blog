@@ -8,7 +8,6 @@ import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
 import Header from '@/components/Header';
 import { useFilter } from '@/contexts/FilterContext';
-import { useStaggerAnimation } from '@/lib/animations';
 import { animate } from 'animejs';
 
 interface HomeClientProps {
@@ -20,14 +19,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
   const { searchQuery, selectedTag, selectedCategory } = useFilter();
   const heroRef = useRef<HTMLElement>(null);
   const postsRef = useRef<HTMLElement>(null);
-
-  // Stagger animation for post cards
-  const { containerRef: postsContainer } = useStaggerAnimation('.post-card', {
-    delay: 100,
-    duration: 600,
-    offsetY: 40,
-    trigger: 'scroll',
-  });
+  const postsContainer = useRef<HTMLDivElement>(null);
 
   // Scroll to posts section
   const scrollToPosts = useCallback(() => {
@@ -170,44 +162,96 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
               </p>
             </div>
           ) : (
-            <div ref={postsContainer} className="home-posts-grid">
-              {filteredPosts.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/post/${post.slug}`}
-                  className="post-card stagger-item"
-                >
-                  {post.cover && (
-                    <div className="post-cover">
-                      <Image src={post.cover} alt={post.title} fill unoptimized />
-                    </div>
-                  )}
-                  <div className="post-content">
-                    <div className="post-meta">
-                      {post.date && <span className="post-date">{formatDate(post.date)}</span>}
-                      {post.category && (
-                        <>
-                          <span className="post-separator">/</span>
-                          <span className="post-category">{post.category}</span>
-                        </>
-                      )}
-                    </div>
-                    <h2 className="post-card-title">{post.title}</h2>
-                    {post.summary && <p className="post-summary">{post.summary}</p>}
-                    {post.tags.length > 0 && (
-                      <div className="post-tags">
-                        {post.tags.map((tag) => (
-                          <span key={tag} className="post-tag">#{tag}</span>
-                        ))}
+            <>
+              {/* Featured Post - Only show when no filters applied */}
+              {!selectedTag && !selectedCategory && !searchQuery && filteredPosts.length > 0 && (
+                <FeaturedPost post={filteredPosts[0]} />
+              )}
+
+              {/* Masonry Grid - Skip first post if featured is shown */}
+              <div ref={postsContainer} className="home-posts-masonry">
+                {(filteredPosts.length > 0 && !selectedTag && !selectedCategory && !searchQuery
+                  ? filteredPosts.slice(1)
+                  : filteredPosts
+                ).map((post, index) => (
+                  <Link
+                    key={post.id}
+                    href={`/post/${post.slug}`}
+                    className="post-card-masonry stagger-item"
+                    style={{ animationDelay: `${index * 80 + 100}ms` }}
+                  >
+                    {post.cover && (
+                      <div className="post-cover-masonry">
+                        <Image src={post.cover} alt={post.title} fill unoptimized />
                       </div>
                     )}
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <div className="post-content-masonry">
+                      <div className="post-meta">
+                        {post.date && <span className="post-date">{formatDate(post.date)}</span>}
+                        {post.category && (
+                          <>
+                            <span className="post-separator">/</span>
+                            <span className="post-category">{post.category}</span>
+                          </>
+                        )}
+                      </div>
+                      <h3 className="post-card-title-masonry">{post.title}</h3>
+                      {post.summary && <p className="post-summary-masonry">{post.summary}</p>}
+                      {post.tags.length > 0 && (
+                        <div className="post-tags-masonry">
+                          {post.tags.map((tag) => (
+                            <span key={tag} className="post-tag-masonry">#{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </div>
     </>
+  );
+}
+
+// Featured Post Component
+function FeaturedPost({ post }: { post: Post }) {
+  return (
+    <Link href={`/post/${post.slug}`} className="featured-post-card stagger-item">
+      {post.cover && (
+        <div className="featured-post-cover">
+          <Image src={post.cover} alt={post.title} fill unoptimized className="featured-post-image" />
+        </div>
+      )}
+      <div className="featured-post-content">
+        <div className="featured-post-badge">Featured</div>
+        <div className="post-meta">
+          {post.date && <span className="post-date">{formatDate(post.date)}</span>}
+          {post.category && (
+            <>
+              <span className="post-separator">/</span>
+              <span className="post-category">{post.category}</span>
+            </>
+          )}
+        </div>
+        <h2 className="featured-post-title">{post.title}</h2>
+        {post.summary && <p className="featured-post-summary">{post.summary}</p>}
+        {post.tags.length > 0 && (
+          <div className="featured-post-tags">
+            {post.tags.map((tag) => (
+              <span key={tag} className="featured-post-tag">#{tag}</span>
+            ))}
+          </div>
+        )}
+        <div className="featured-post-cta">
+          Read Article
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    </Link>
   );
 }
