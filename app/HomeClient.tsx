@@ -5,12 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
+import LiquidGradient from '@/components/LiquidGradient';
 
 export default function HomeClient() {
   // 滚动到文章区域
   const scrollToPosts = useCallback(() => {
     window.scrollTo({
-      top: window.innerHeight,
+      top: window.innerHeight - 80,
       behavior: 'smooth',
     });
   }, []);
@@ -78,30 +79,36 @@ export default function HomeClient() {
   }, [allPosts, selectedTag, selectedCategory, searchQuery]);
 
   return (
-    <div className="container">
-      {/* Hero Section */}
+    <>
+      {/* Hero Section - full viewport width, outside container */}
       <section className="home-hero">
-        <div className="home-hero-content">
-          <p className="home-hero-eyebrow animate-fade-in">Technical Blog</p>
-          <h1 className="home-hero-title animate-fade-in-up">
-            Thoughts on <span className="accent">code</span>,
-            <br />
-            design & everything in between.
-          </h1>
-          <p className="home-hero-subtitle animate-fade-in-up">
-            Exploring software development, one article at a time.
-          </p>
-        </div>
-        <div className="home-hero-decoration home-hero-decoration-1" />
-        <div className="home-hero-decoration home-hero-decoration-2" />
+        <LiquidGradient />
+        <div className="container home-hero-content-wrapper">
+          <div className="home-hero-content">
+            <p className="home-hero-eyebrow animate-fade-in">Technical Blog</p>
+            <h1 className="home-hero-title animate-fade-in-up">
+              Thoughts on <span className="accent">code</span>,
+              <br />
+              design & everything in between.
+            </h1>
+            <p className="home-hero-subtitle animate-fade-in-up">
+              Exploring software development, one article at a time.
+            </p>
+          </div>
+          <div className="home-hero-decoration home-hero-decoration-1" />
+          <div className="home-hero-decoration home-hero-decoration-2" />
 
-        {/* Scroll Indicator */}
-        <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
+          {/* Scroll Indicator */}
+          <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
         </div>
       </section>
+
+      {/* Rest of content in container */}
+      <div className="container">
 
       {/* Search & Filters */}
       <section className="filters-section">
@@ -192,6 +199,7 @@ export default function HomeClient() {
           </div>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }

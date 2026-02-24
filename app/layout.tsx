@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ThemeProvider } from "next-themes";
-import LiquidGradient from "@/components/LiquidGradient";
 import CustomCursor from "@/components/CustomCursor";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -79,7 +78,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LiquidGradient />
           <CustomCursor />
           <header className="header">
             <div className="container">

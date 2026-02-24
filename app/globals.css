@@ -49,7 +49,7 @@ html {
 }
 
 body {
-  background: transparent;
+  background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.7;
@@ -331,12 +331,21 @@ a:hover {
   align-items: center;
   padding: 80px 0 60px;
   overflow: hidden;
+  width: 100%;
+}
+
+.home-hero-content-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
 /* Scroll Indicator */
 .scroll-indicator {
   position: absolute;
-  bottom: 40px;
+  bottom: 180px;
   left: 50%;
   transform: translateX(-50%);
   cursor: pointer;
@@ -347,7 +356,7 @@ a:hover {
 .scroll-indicator svg {
   width: 48px;
   height: 48px;
-  stroke: var(--accent);
+  stroke: #ffffff;
 }
 
 .scroll-indicator:hover {
@@ -383,6 +392,12 @@ a:hover {
 .home-hero-title .accent {
   color: var(--accent);
   font-style: italic;
+}
+
+/* White theme - make hero title text white */
+[data-theme="light"] .home-hero-title,
+[data-theme="light"] .home-hero-title span:not(.accent) {
+  color: #ffffff !important;
 }
 
 .home-hero-subtitle {
