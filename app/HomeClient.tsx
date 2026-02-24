@@ -6,44 +6,39 @@ import Image from 'next/image';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
+import Header from '@/components/Header';
+import { useFilter } from '@/contexts/FilterContext';
 
-export default function HomeClient() {
+interface HomeClientProps {
+  tags: string[];
+  categories: string[];
+}
+
+export default function HomeClient({ tags, categories }: HomeClientProps) {
+  const { searchQuery, selectedTag, selectedCategory } = useFilter();
+
   // 滚动到文章区域
   const scrollToPosts = useCallback(() => {
-    const filtersSection = document.querySelector('.filters-section');
-    if (filtersSection) {
-      filtersSection.scrollIntoView({
+    const postsSection = document.querySelector('.home-posts-section');
+    if (postsSection) {
+      postsSection.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
     }
   }, []);
+
   const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
-  const [allCategories, setAllCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // 首次加载时获取所有数据
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
-        const [postsRes, tagsRes, categoriesRes] = await Promise.all([
-          fetch('/api/posts'),
-          fetch('/api/tags'),
-          fetch('/api/categories'),
-        ]);
-
+        const postsRes = await fetch('/api/posts');
         const postsData = await postsRes.json();
-        const tagsData = await tagsRes.json();
-        const categoriesData = await categoriesRes.json();
-
         setAllPosts(postsData.posts || []);
-        setAllTags(tagsData.tags || []);
-        setAllCategories(categoriesData.categories || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -83,6 +78,9 @@ export default function HomeClient() {
 
   return (
     <>
+      {/* Header with integrated filters */}
+      <Header tags={tags} categories={categories} />
+
       {/* Hero Section - full viewport width, outside container */}
       <section className="home-hero">
         <LiquidGradient />
@@ -103,7 +101,14 @@ export default function HomeClient() {
         </div>
 
         {/* Scroll Indicator - outside container, fixed to viewport */}
-        <div className="scroll-indicator" onClick={scrollToPosts} onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()} tabIndex={0} role="button" aria-label="Scroll to articles">
+        <div
+          className="scroll-indicator"
+          onClick={scrollToPosts}
+          onKeyDown={(e) => e.key === 'Enter' && scrollToPosts()}
+          tabIndex={0}
+          role="button"
+          aria-label="Scroll to articles"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M6 9l6 6 6-6" />
           </svg>
@@ -112,96 +117,56 @@ export default function HomeClient() {
 
       {/* Rest of content in container */}
       <div className="container">
-
-      {/* Search & Filters */}
-      <section className="filters-section">
-        <div className="home-search-wrapper animate-fade-in-up">
-          <svg className="home-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            className="home-search-input"
-            placeholder="Search articles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        {allTags.length > 0 && (
-          <div className="home-tags-wrapper animate-fade-in-up">
-            <span className="home-filter-label">Tags:</span>
-            <div className="home-tags-list">
-              <button className={`tag ${selectedTag === null ? 'active' : ''}`} onClick={() => setSelectedTag(null)}>All</button>
-              {allTags.map((tag) => (
-                <button key={tag} className={`tag ${selectedTag === tag ? 'active' : ''}`} onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}>{tag}</button>
-              ))}
+        {/* Posts Grid */}
+        <section className="home-posts-section">
+          {loading ? (
+            <div className="home-loading-wrapper">
+              <div className="loading-spinner" />
+              <p>Loading articles...</p>
             </div>
-          </div>
-        )}
-
-        {allCategories.length > 0 && (
-          <div className="home-categories-wrapper animate-fade-in-up">
-            <span className="home-filter-label">Category:</span>
-            <div className="home-categories-list">
-              <button className={`category-btn ${selectedCategory === null ? 'active' : ''}`} onClick={() => setSelectedCategory(null)}>All</button>
-              {allCategories.map((category) => (
-                <button key={category} className={`category-btn ${selectedCategory === category ? 'active' : ''}`} onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}>{category}</button>
-              ))}
+          ) : filteredPosts.length === 0 ? (
+            <div className="home-empty-state animate-fade-in">
+              <p className="home-empty-title">No articles found</p>
+              <p className="home-empty-subtitle">
+                {searchQuery || selectedTag || selectedCategory
+                  ? 'Try adjusting your filters'
+                  : 'Add some posts to your Notion database to get started.'}
+              </p>
             </div>
-          </div>
-        )}
-      </section>
-
-      {/* Posts Grid */}
-      <section className="home-posts-section">
-        {loading ? (
-          <div className="home-loading-wrapper">
-            <div className="loading-spinner" />
-            <p>Loading articles...</p>
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="home-empty-state animate-fade-in">
-            <p className="home-empty-title">No articles found</p>
-            <p className="home-empty-subtitle">
-              {searchQuery || selectedTag || selectedCategory ? 'Try adjusting your filters' : 'Add some posts to your Notion database to get started.'}
-            </p>
-          </div>
-        ) : (
-          <div className="home-posts-grid stagger-children">
-            {filteredPosts.map((post) => (
-              <Link key={post.id} href={`/post/${post.slug}`} className="post-card">
-                {post.cover && (
-                  <div className="post-cover">
-                    <Image src={post.cover} alt={post.title} fill unoptimized />
-                  </div>
-                )}
-                <div className="post-content">
-                  <div className="post-meta">
-                    {post.date && <span className="post-date">{formatDate(post.date)}</span>}
-                    {post.category && (
-                      <>
-                        <span className="post-separator">/</span>
-                        <span className="post-category">{post.category}</span>
-                      </>
-                    )}
-                  </div>
-                  <h2 className="post-card-title">{post.title}</h2>
-                  {post.summary && <p className="post-summary">{post.summary}</p>}
-                  {post.tags.length > 0 && (
-                    <div className="post-tags">
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="post-tag">#{tag}</span>
-                      ))}
+          ) : (
+            <div className="home-posts-grid stagger-children">
+              {filteredPosts.map((post) => (
+                <Link key={post.id} href={`/post/${post.slug}`} className="post-card">
+                  {post.cover && (
+                    <div className="post-cover">
+                      <Image src={post.cover} alt={post.title} fill unoptimized />
                     </div>
                   )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+                  <div className="post-content">
+                    <div className="post-meta">
+                      {post.date && <span className="post-date">{formatDate(post.date)}</span>}
+                      {post.category && (
+                        <>
+                          <span className="post-separator">/</span>
+                          <span className="post-category">{post.category}</span>
+                        </>
+                      )}
+                    </div>
+                    <h2 className="post-card-title">{post.title}</h2>
+                    {post.summary && <p className="post-summary">{post.summary}</p>}
+                    {post.tags.length > 0 && (
+                      <div className="post-tags">
+                        {post.tags.map((tag) => (
+                          <span key={tag} className="post-tag">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </>
   );
