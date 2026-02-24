@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { animate } from 'animejs';
+import { animate, stagger } from 'animejs';
 
 interface AnimatedTextProps {
   text: string;
@@ -38,7 +38,7 @@ export default function AnimatedText({
     animate(chars, {
       opacity: [0, 1],
       translateY: [20, 0],
-      delay: animate.stagger(30, { start: delay }),
+      delay: stagger(30, { start: delay }),
       duration: 800,
       easing: 'easeOutExpo',
     });

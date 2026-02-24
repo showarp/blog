@@ -8,7 +8,7 @@ import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
 import Header from '@/components/Header';
 import { useFilter } from '@/contexts/FilterContext';
-import { animate } from 'animejs';
+import { animate, stagger } from 'animejs';
 
 interface HomeClientProps {
   tags: string[];
@@ -64,7 +64,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
       animate([eyebrow, title, subtitle], {
         opacity: [0, 1],
         translateY: [30, 0],
-        delay: animate.stagger(150, { start: 200 }),
+        delay: stagger(150, { start: 200 }),
         duration: 1000,
         easing: 'easeOutExpo',
       });

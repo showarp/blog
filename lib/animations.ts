@@ -1,6 +1,6 @@
 'use client';
 
-import { animate, type AnimationParams } from 'animejs';
+import { animate, stagger, type AnimationParams } from 'animejs';
 import { useEffect, useRef, useCallback } from 'react';
 
 /**
@@ -41,7 +41,7 @@ export function useInViewAnimation(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            animationRef.current = animate.default(element, animationParams);
+            animationRef.current = animate(element, animationParams);
 
             if (triggerOnce) {
               observer.unobserve(entry.target);
@@ -86,10 +86,10 @@ export function useStaggerAnimation(
 
     const { delay = 0, duration = 600, offsetY = 30 } = options || {};
 
-    animate.default(elements, {
+    animate(elements, {
       opacity: [0, 1],
       translateY: [offsetY, 0],
-      delay: animate.default.stagger(80, { start: delay }),
+      delay: stagger(80, { start: delay }),
       duration,
       easing: 'easeOutExpo',
     });
@@ -130,7 +130,7 @@ export const textReveal = (selector: string, delay = 0) => {
   const element = document.querySelector(selector);
   if (!element) return;
 
-  animate.default(element, {
+  animate(element, {
     opacity: [0, 1],
     translateY: [20, 0],
     delay,
@@ -143,7 +143,7 @@ export const textReveal = (selector: string, delay = 0) => {
  * Utility: Spring hover effect
  */
 export const springHover = (element: HTMLElement) => {
-  animate.default(element, {
+  animate(element, {
     scale: [1, 1.02, 0.98, 1],
     duration: 400,
     easing: 'easeOutElastic(1, .8)',
@@ -171,7 +171,7 @@ export const createRipple = (element: HTMLElement, event: MouseEvent) => {
 
   element.appendChild(ripple);
 
-  animate.default(ripple, {
+  animate(ripple, {
     scale: [0, 2],
     opacity: [0.3, 0],
     duration: 600,
