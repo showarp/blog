@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 interface FilterState {
   searchQuery: string;
@@ -17,73 +18,39 @@ interface FilterContextValue extends FilterState {
 const FilterContext = createContext<FilterContextValue | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL params
   const [state, setState] = useState<FilterState>({
-    searchQuery: '',
-    selectedTag: null,
-    selectedCategory: null,
+    searchQuery: searchParams.get('q') || '',
+    selectedTag: searchParams.get('tag'),
+    selectedCategory: searchParams.get('category'),
   });
 
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Initialize from URL on mount (client-side only)
+  // Sync state when URL params change (from external navigation)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      setState({
-        searchQuery: params.get('q') || '',
-        selectedTag: params.get('tag'),
-        selectedCategory: params.get('category'),
-      });
-      setIsInitialized(true);
-    }
-  }, []);
-
-  const updateUrl = useCallback((newState: FilterState) => {
-    if (typeof window === 'undefined') return;
-
-    const params = new URLSearchParams();
-    if (newState.searchQuery) params.set('q', newState.searchQuery);
-    if (newState.selectedTag) params.set('tag', newState.selectedTag);
-    if (newState.selectedCategory) params.set('category', newState.selectedCategory);
-
-    const newUrl = params.toString() ? `${window.location.pathname}?${params}` : window.location.pathname;
-    window.history.replaceState(null, '', newUrl);
-  }, []);
+    setState({
+      searchQuery: searchParams.get('q') || '',
+      selectedTag: searchParams.get('tag'),
+      selectedCategory: searchParams.get('category'),
+    });
+  }, [searchParams]);
 
   const setSearchQuery = useCallback((query: string) => {
-    setState(prev => {
-      const newState = { ...prev, searchQuery: query };
-      updateUrl(newState);
-      return newState;
-    });
-  }, [updateUrl]);
+    setState(prev => ({ ...prev, searchQuery: query }));
+  }, []);
 
   const setSelectedTag = useCallback((tag: string | null) => {
-    setState(prev => {
-      const newState = { ...prev, selectedTag: tag };
-      updateUrl(newState);
-      return newState;
-    });
-  }, [updateUrl]);
+    setState(prev => ({ ...prev, selectedTag: tag }));
+  }, []);
 
   const setSelectedCategory = useCallback((category: string | null) => {
-    setState(prev => {
-      const newState = { ...prev, selectedCategory: category };
-      updateUrl(newState);
-      return newState;
-    });
-  }, [updateUrl]);
+    setState(prev => ({ ...prev, selectedCategory: category }));
+  }, []);
 
   const clearFilters = useCallback(() => {
-    const emptyState = { searchQuery: '', selectedTag: null, selectedCategory: null };
-    setState(emptyState);
-    updateUrl(emptyState);
-  }, [updateUrl]);
-
-  // Don't render children until initialized to prevent hydration mismatch
-  if (!isInitialized) {
-    return null;
-  }
+    setState({ searchQuery: '', selectedTag: null, selectedCategory: null });
+  }, []);
 
   return (
     <FilterContext.Provider value={{ ...state, setSearchQuery, setSelectedTag, setSelectedCategory, clearFilters }}>

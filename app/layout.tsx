@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import CustomCursor from "@/components/CustomCursor";
 import Footer from "@/components/Footer";
+import LayoutClient from "@/components/LayoutClient";
+import { getTags, getCategories } from "@/lib/notion";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 
@@ -58,11 +60,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const tags = await getTags();
+  const categories = await getCategories();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -76,7 +81,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <CustomCursor />
-          <main className="main">{children}</main>
+          <LayoutClient tags={tags} categories={categories}>
+            <main className="main">{children}</main>
+          </LayoutClient>
           <Footer />
         </ThemeProvider>
       </body>

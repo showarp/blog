@@ -1,12 +1,12 @@
 'use client'
 
+import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
 
 // 配置常量
 const TRAIL_DOTS = 30  // 拖尾圆点数量
 const LERP_FACTOR = 0.9  // lerp 延迟系数 (越大跟随越快)
 const MAIN_CURSOR_SIZE = 20  // 主光标大小
-const THEME_COLOR = '#ffffff'  // 主题色
 // z-index must be higher than lightbox overlay (999999) to appear on top
 const CURSOR_Z_INDEX = 1000000  // 高于灯箱的 z-index
 
@@ -16,10 +16,15 @@ const lerp = (start: number, end: number, factor: number) => {
 }
 
 export default function CustomCursor() {
+  const { theme, resolvedTheme } = useTheme()
   const mainCursorRef = useRef<HTMLDivElement>(null)
   const trailDotsRef = useRef<HTMLDivElement[]>([])
   const [isHovering, setIsHovering] = useState(false)
   const [isInput, setIsInput] = useState(false)
+
+  // 根据主题设置光标颜色
+  const currentTheme = theme === 'system' ? resolvedTheme : theme
+  const cursorColor = currentTheme === 'dark' ? '#ffffff' : '#1a1a1a'
 
   // 鼠标位置
   const mouseX = useRef(0)
@@ -238,14 +243,14 @@ export default function CustomCursor() {
               position: 'fixed',
               width: `${size}px`,
               height: `${size}px`,
-              background: THEME_COLOR,
+              background: cursorColor,
               borderRadius: borderRadius,
               pointerEvents: 'none',
               zIndex: CURSOR_Z_INDEX - index,
               transform: 'translate(-50%, -50%)',
               filter: `blur(${blur}px)`,
               opacity: opacity,
-              transition: 'opacity 0.1s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease',
+              transition: 'opacity 0.1s ease, width 0.2s ease, height 0.2s ease, border-radius 0.2s ease, background 0.2s ease',
               willChange: 'left, top, transform, width, height, border-radius',
             }}
           />
@@ -260,12 +265,12 @@ export default function CustomCursor() {
           position: 'fixed',
           left: 0,
           top: 0,
-          background: THEME_COLOR,
+          background: cursorColor,
           pointerEvents: 'none',
           zIndex: CURSOR_Z_INDEX,
           transform: 'translate(-50%, -50%)',
-          boxShadow: `0 0 10px ${THEME_COLOR}80, 0 0 20px ${THEME_COLOR}50`,
-          transition: 'width 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease',
+          boxShadow: `0 0 10px ${cursorColor}80, 0 0 20px ${cursorColor}50`,
+          transition: 'width 0.2s ease, height 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
           willChange: 'left, top, transform, width, height, border-radius',
           ...cursorStyle,
         }}

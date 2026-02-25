@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { Post } from '@/types';
 import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
-import Header from '@/components/Header';
 import { useFilter } from '@/contexts/FilterContext';
 import { animate, stagger } from 'animejs';
 
@@ -16,10 +16,12 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ tags, categories }: HomeClientProps) {
+  const searchParams = useSearchParams();
   const { searchQuery, selectedTag, selectedCategory } = useFilter();
   const heroRef = useRef<HTMLElement>(null);
   const postsRef = useRef<HTMLElement>(null);
   const postsContainer = useRef<HTMLDivElement>(null);
+  const hasAutoScrolledRef = useRef(false);
 
   // Scroll to posts section
   const scrollToPosts = useCallback(() => {
@@ -31,6 +33,39 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
       });
     }
   }, []);
+
+  // Track previous search params to detect changes
+  const prevSearchParamsRef = useRef<string>('');
+
+  // Auto-scroll to posts section when navigating with search params or #posts hash
+  useEffect(() => {
+    const hasSearchParams = searchParams.has('q') || searchParams.has('tag') || searchParams.has('category');
+    const hasPostsHash = window.location.hash === '#posts';
+    const currentParams = searchParams.toString();
+    const paramsChanged = prevSearchParamsRef.current !== currentParams;
+
+    // Reset scroll flag if search params changed (allows re-scrolling on new searches)
+    if (paramsChanged) {
+      hasAutoScrolledRef.current = false;
+      prevSearchParamsRef.current = currentParams;
+    }
+
+    if ((hasSearchParams || hasPostsHash) && !hasAutoScrolledRef.current) {
+      hasAutoScrolledRef.current = true;
+      // Use double requestAnimationFrame to ensure DOM is fully updated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const postsSection = document.querySelector('.home-posts-section');
+          if (postsSection) {
+            postsSection.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
+        });
+      });
+    }
+  }, [searchParams]);
 
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +87,30 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
 
     fetchInitialData();
   }, []);
+
+  // Filtered posts
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter((post) => {
+      if (selectedTag && !post.tags.includes(selectedTag)) {
+        return false;
+      }
+
+      if (selectedCategory && post.category !== selectedCategory) {
+        return false;
+      }
+
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchTitle = post.title.toLowerCase().includes(query);
+        const matchSummary = post.summary?.toLowerCase().includes(query);
+        if (!matchTitle && !matchSummary) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allPosts, selectedTag, selectedCategory, searchQuery]);
 
   // Animate hero content on mount
   useEffect(() => {
@@ -81,35 +140,27 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
     }
   }, []);
 
-  // Filtered posts
-  const filteredPosts = useMemo(() => {
-    return allPosts.filter((post) => {
-      if (selectedTag && !post.tags.includes(selectedTag)) {
-        return false;
-      }
-
-      if (selectedCategory && post.category !== selectedCategory) {
-        return false;
-      }
-
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchTitle = post.title.toLowerCase().includes(query);
-        const matchSummary = post.summary?.toLowerCase().includes(query);
-        if (!matchTitle && !matchSummary) {
-          return false;
+  // Animate posts when they are loaded
+  useEffect(() => {
+    if (!loading && filteredPosts.length > 0) {
+      // Wait for DOM to update
+      requestAnimationFrame(() => {
+        const staggerItems = document.querySelectorAll('.stagger-item');
+        if (staggerItems.length > 0) {
+          animate(staggerItems, {
+            opacity: [0, 1],
+            translateY: [40, 0],
+            delay: stagger(80, { start: 100 }),
+            duration: 600,
+            easing: 'easeOutExpo',
+          });
         }
-      }
-
-      return true;
-    });
-  }, [allPosts, selectedTag, selectedCategory, searchQuery]);
+      });
+    }
+  }, [loading, filteredPosts.length]);
 
   return (
     <>
-      {/* Header with integrated filters */}
-      <Header tags={tags} categories={categories} />
-
       {/* Hero Section */}
       <section ref={heroRef} className="home-hero">
         <LiquidGradient />

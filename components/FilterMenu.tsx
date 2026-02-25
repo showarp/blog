@@ -5,7 +5,7 @@ import { useFilter } from '@/contexts/FilterContext';
 interface FilterMenuProps {
   tags: string[];
   categories: string[];
-  variant?: 'desktop' | 'mobile';
+  variant?: 'desktop' | 'mobile' | 'popup';
 }
 
 export default function FilterMenu({ tags, categories, variant = 'desktop' }: FilterMenuProps) {
@@ -15,25 +15,74 @@ export default function FilterMenu({ tags, categories, variant = 'desktop' }: Fi
   const tagRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click - only for desktop/mobile variants
+  // For popup variant, let the parent Header handle the click outside logic
   useEffect(() => {
+    if (variant === 'popup') return; // Skip for popup variant
+
     const handleClickOutside = (e: MouseEvent) => {
-      if (tagRef.current && !tagRef.current.contains(e.target as Node)) setTagOpen(false);
-      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) setCategoryOpen(false);
+      // Tag dropdown - check if click is in button OR dropdown
+      const tagButton = tagRef.current?.querySelector('button');
+      const tagDropdown = tagRef.current?.querySelector('.filter-menu-dropdown');
+      const targetInTagButton = tagButton?.contains(e.target as Node);
+      const targetInTagDropdown = tagDropdown?.contains(e.target as Node);
+
+      // Category dropdown - check if click is in button OR dropdown
+      const categoryButton = categoryRef.current?.querySelector('button');
+      const categoryDropdown = categoryRef.current?.querySelector('.filter-menu-dropdown');
+      const targetInCategoryButton = categoryButton?.contains(e.target as Node);
+      const targetInCategoryDropdown = categoryDropdown?.contains(e.target as Node);
+
+      // Only close if click is outside both button and dropdown
+      if (!targetInTagButton && !targetInTagDropdown) {
+        setTagOpen(false);
+      }
+      if (!targetInCategoryButton && !targetInCategoryDropdown) {
+        setCategoryOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Stop propagation for popup variant to prevent parent popup from closing
+  const handleContainerClick = (e: React.MouseEvent) => {
+    if (variant === 'popup') {
+      e.stopPropagation();
+    }
+  };
+
   const isDesktop = variant === 'desktop';
 
+  // Toggle tag dropdown (and close category if opening)
+  const toggleTagOpen = () => {
+    setTagOpen(prev => {
+      const newState = !prev;
+      if (newState) {
+        setCategoryOpen(false); // Close category when opening tag
+      }
+      return newState;
+    });
+  };
+
+  // Toggle category dropdown (and close tag if opening)
+  const toggleCategoryOpen = () => {
+    setCategoryOpen(prev => {
+      const newState = !prev;
+      if (newState) {
+        setTagOpen(false); // Close tag when opening category
+      }
+      return newState;
+    });
+  };
+
   return (
-    <div className={`filter-menu ${variant}`}>
+    <div className={`filter-menu ${variant}`} onClick={handleContainerClick}>
       {/* Tag Filter */}
-      <div className="filter-menu-item" ref={tagRef}>
+      <div className="filter-menu-item" ref={tagRef} onClick={(e) => e.stopPropagation()}>
         <button
           className="filter-menu-trigger"
-          onClick={() => setTagOpen(!tagOpen)}
+          onClick={toggleTagOpen}
           aria-expanded={tagOpen}
           aria-label="Filter by tag"
         >
@@ -68,10 +117,10 @@ export default function FilterMenu({ tags, categories, variant = 'desktop' }: Fi
       </div>
 
       {/* Category Filter */}
-      <div className="filter-menu-item" ref={categoryRef}>
+      <div className="filter-menu-item" ref={categoryRef} onClick={(e) => e.stopPropagation()}>
         <button
           className="filter-menu-trigger"
-          onClick={() => setCategoryOpen(!categoryOpen)}
+          onClick={toggleCategoryOpen}
           aria-expanded={categoryOpen}
           aria-label="Filter by category"
         >
