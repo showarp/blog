@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -15,40 +15,18 @@ interface HomeClientProps {
   categories: string[];
 }
 
-export default function HomeClient({ tags, categories }: HomeClientProps) {
+// Inner component that uses useSearchParams - wrapped in Suspense
+function HomeContent({ tags, categories }: HomeClientProps) {
   const searchParams = useSearchParams();
   const { searchQuery, selectedTag, selectedCategory } = useFilter();
-  const heroRef = useRef<HTMLElement>(null);
-  const postsRef = useRef<HTMLElement>(null);
-  const postsContainer = useRef<HTMLDivElement>(null);
-  const hasAutoScrolledRef = useRef(false);
-
-  // Scroll to posts section
-  const scrollToPosts = useCallback(() => {
-    const postsSection = document.querySelector('.home-posts-section');
-    if (postsSection) {
-      postsSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }, []);
 
   // Track previous search params to detect changes
-  const prevSearchParamsRef = useRef<string>('');
+  const hasAutoScrolledRef = useMemo(() => ({ current: false }), []);
 
   // Auto-scroll to posts section when navigating with search params or #posts hash
   useEffect(() => {
     const hasSearchParams = searchParams.has('q') || searchParams.has('tag') || searchParams.has('category');
-    const hasPostsHash = window.location.hash === '#posts';
-    const currentParams = searchParams.toString();
-    const paramsChanged = prevSearchParamsRef.current !== currentParams;
-
-    // Reset scroll flag if search params changed (allows re-scrolling on new searches)
-    if (paramsChanged) {
-      hasAutoScrolledRef.current = false;
-      prevSearchParamsRef.current = currentParams;
-    }
+    const hasPostsHash = typeof window !== 'undefined' && window.location.hash === '#posts';
 
     if ((hasSearchParams || hasPostsHash) && !hasAutoScrolledRef.current) {
       hasAutoScrolledRef.current = true;
@@ -65,10 +43,44 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
         });
       });
     }
-  }, [searchParams]);
+  }, [searchParams, hasAutoScrolledRef]);
 
+  return (
+    <HomeMainContent
+      tags={tags}
+      categories={categories}
+      searchQuery={searchQuery}
+      selectedTag={selectedTag}
+      selectedCategory={selectedCategory}
+    />
+  );
+}
+
+// Main content component that doesn't use useSearchParams
+function HomeMainContent({
+  tags,
+  categories,
+  searchQuery,
+  selectedTag,
+  selectedCategory,
+}: HomeClientProps & {
+  searchQuery: string;
+  selectedTag: string | null;
+  selectedCategory: string | null;
+}) {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Scroll to posts section
+  const scrollToPosts = () => {
+    const postsSection = document.querySelector('.home-posts-section');
+    if (postsSection) {
+      postsSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
 
   // Fetch posts on mount
   useEffect(() => {
@@ -162,7 +174,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
   return (
     <>
       {/* Hero Section */}
-      <section ref={heroRef} className="home-hero">
+      <section className="home-hero">
         <LiquidGradient />
         <div className="container home-hero-content-wrapper">
           <div className="home-hero-content">
@@ -197,7 +209,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
 
       {/* Content */}
       <div className="container">
-        <section ref={postsRef} className="home-posts-section">
+        <section className="home-posts-section">
           {loading ? (
             <div className="home-loading-wrapper">
               <div className="loading-spinner" />
@@ -220,7 +232,7 @@ export default function HomeClient({ tags, categories }: HomeClientProps) {
               )}
 
               {/* Masonry Grid - Skip first post if featured is shown */}
-              <div ref={postsContainer} className="home-posts-masonry">
+              <div className="home-posts-masonry">
                 {(filteredPosts.length > 0 && !selectedTag && !selectedCategory && !searchQuery
                   ? filteredPosts.slice(1)
                   : filteredPosts
@@ -304,5 +316,49 @@ function FeaturedPost({ post }: { post: Post }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+// Fallback component for Suspense
+function HomeFallback() {
+  return (
+    <>
+      {/* Hero Section */}
+      <section className="home-hero">
+        <LiquidGradient />
+        <div className="container home-hero-content-wrapper">
+          <div className="home-hero-content">
+            <p className="home-hero-eyebrow">Technical Blog</p>
+            <h1 className="home-hero-title">
+              Thoughts on <span className="accent">code</span>,
+              <br />
+              design & everything in between.
+            </h1>
+            <p className="home-hero-subtitle">
+              Exploring software development, one article at a time.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="container">
+        <section className="home-posts-section">
+          <div className="home-loading-wrapper">
+            <div className="loading-spinner" />
+            <p>Loading articles...</p>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
+
+// Main export with Suspense wrapper
+export default function HomeClient({ tags, categories }: HomeClientProps) {
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <HomeContent tags={tags} categories={categories} />
+    </Suspense>
   );
 }

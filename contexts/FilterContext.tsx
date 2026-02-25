@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface FilterState {
@@ -17,7 +17,8 @@ interface FilterContextValue extends FilterState {
 
 const FilterContext = createContext<FilterContextValue | undefined>(undefined);
 
-export function FilterProvider({ children }: { children: ReactNode }) {
+// Inner component that uses useSearchParams - must be wrapped in Suspense
+function FilterProviderInner({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
 
   // Initialize state from URL params
@@ -35,6 +36,46 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       selectedCategory: searchParams.get('category'),
     });
   }, [searchParams]);
+
+  const setSearchQuery = useCallback((query: string) => {
+    setState(prev => ({ ...prev, searchQuery: query }));
+  }, []);
+
+  const setSelectedTag = useCallback((tag: string | null) => {
+    setState(prev => ({ ...prev, selectedTag: tag }));
+  }, []);
+
+  const setSelectedCategory = useCallback((category: string | null) => {
+    setState(prev => ({ ...prev, selectedCategory: category }));
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setState({ searchQuery: '', selectedTag: null, selectedCategory: null });
+  }, []);
+
+  return (
+    <FilterContext.Provider value={{ ...state, setSearchQuery, setSelectedTag, setSelectedCategory, clearFilters }}>
+      {children}
+    </FilterContext.Provider>
+  );
+}
+
+// Wrapper component with Suspense boundary
+export function FilterProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<FilterFallback>{children}</FilterFallback>}>
+      <FilterProviderInner>{children}</FilterProviderInner>
+    </Suspense>
+  );
+}
+
+// Fallback component that provides default values while loading
+function FilterFallback({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<FilterState>({
+    searchQuery: '',
+    selectedTag: null,
+    selectedCategory: null,
+  });
 
   const setSearchQuery = useCallback((query: string) => {
     setState(prev => ({ ...prev, searchQuery: query }));
