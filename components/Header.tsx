@@ -146,57 +146,60 @@ export default function Header({ tags, categories }: HeaderProps) {
 
               {/* Search Popup */}
               {searchPopupOpen && (
-                <div ref={popupRef} className={`search-popup ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-                  <div className="search-popup-header">
-                    <span className="search-popup-title">Search & Filter</span>
-                    <button
-                      className="search-popup-close"
-                      onClick={closeSearchPopup}
-                      aria-label="Close search"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="search-popup-content">
-                    <div className="search-popup-input-wrapper">
-                      <svg className="search-popup-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.35-4.35"/>
-                      </svg>
-                      <input
-                        type="text"
-                        className="search-popup-input"
-                        placeholder="Search articles..."
-                        value={searchQuery}
-                        onChange={handleSearch}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                      />
+                <>
+                  {/* Overlay */}
+                  <div
+                    className="search-popup-overlay"
+                    onClick={closeSearchPopup}
+                  />
+                  {/* Popup */}
+                  <div ref={popupRef} className={`search-popup ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
+                    {/* Decorative accent corner */}
+                    <div className="search-popup-accent" />
+                    <div className="search-popup-header">
+                      <span className="search-popup-title">Search & Filter</span>
+                      <button
+                        className="search-popup-close"
+                        onClick={closeSearchPopup}
+                        aria-label="Close search"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
                     </div>
-                    <div className="search-popup-filters">
-                      <FilterMenu tags={tags} categories={categories} variant="popup" />
-                    </div>
-                    <button className="search-submit-btn" onClick={() => {
-                      const params = new URLSearchParams();
-                      if (searchQuery) params.set('q', searchQuery);
-                      if (selectedTag) params.set('tag', selectedTag);
-                      if (selectedCategory) params.set('category', selectedCategory);
+                    <div className="search-popup-content">
+                      <div className="search-popup-input-wrapper">
+                        <input
+                          type="text"
+                          className="search-popup-input"
+                          placeholder="Search articles..."
+                          value={searchQuery}
+                          onChange={handleSearch}
+                          onKeyDown={handleKeyDown}
+                          autoFocus
+                        />
+                      </div>
+                      <div className="search-popup-filters">
+                        <FilterMenu tags={tags} categories={categories} variant="popup" />
+                      </div>
+                      <button className="search-submit-btn" onClick={() => {
+                        const params = new URLSearchParams();
+                        if (searchQuery) params.set('q', searchQuery);
+                        if (selectedTag) params.set('tag', selectedTag);
+                        if (selectedCategory) params.set('category', selectedCategory);
 
-                      const queryString = params.toString();
-                      // Navigate to homepage with search params and hash for scrolling
-                      // scroll: false prevents Next.js from scrolling to top
-                      router.push(`/?${queryString}#posts`, { scroll: false });
-                      closeSearchPopup();
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                      </svg>
-                      <span>Search</span>
-                    </button>
+                        const queryString = params.toString();
+                        // Navigate to homepage with search params and hash for scrolling
+                        // scroll: false prevents Next.js from scrolling to top
+                        router.push(`/?${queryString}#posts`, { scroll: false });
+                        closeSearchPopup();
+                      }}>
+                        <span>Search</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
 
               {mounted && (

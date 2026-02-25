@@ -339,6 +339,7 @@ a:hover {
   padding: 80px 0 60px;
   overflow: hidden;
   width: 100%;
+  background: var(--bg-primary);
 }
 
 .home-hero-content-wrapper {
@@ -347,6 +348,35 @@ a:hover {
   max-width: var(--container-width);
   margin: 0 auto;
   padding: 0 24px;
+  z-index: 2;
+}
+
+/* Vignette overlay - center clear, edges blurred/darkened for text clarity */
+.home-hero-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 20%,
+    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+[data-theme="light"] .home-hero-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
 }
 
 /* Scroll Indicator */
@@ -387,6 +417,7 @@ a:hover {
   letter-spacing: 0.15em;
   color: var(--accent);
   margin-bottom: 16px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
 
 .home-hero-title {
@@ -394,6 +425,8 @@ a:hover {
   font-weight: 600;
   line-height: 1.1;
   margin-bottom: 24px;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
 }
 
 .home-hero-title .accent {
@@ -401,16 +434,22 @@ a:hover {
   font-style: italic;
 }
 
-/* White theme - make hero title text white */
+/* White theme - make hero title text white with dark shadow */
 [data-theme="light"] .home-hero-title,
 [data-theme="light"] .home-hero-title span:not(.accent) {
   color: #ffffff !important;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] .home-hero-eyebrow {
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
 
 .home-hero-subtitle {
   font-size: 18px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   max-width: 500px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
 
 .home-hero-decoration {
@@ -1013,33 +1052,6 @@ a:hover {
     color: var(--accent);
     background: var(--bg-tertiary);
   }
-
-  /* Search Submit Button */
-  .search-submit-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 16px;
-    margin-top: 12px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: var(--accent);
-    color: var(--bg-primary);
-    border: none;
-    border-radius: 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .search-submit-btn:hover {
-    background: var(--accent-dim);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(232, 255, 71, 0.3);
-  }
 }
 
 @media (max-width: 768px) {
@@ -1162,54 +1174,79 @@ a:hover {
   align-items: center;
 }
 
-/* Search Popup - Editorial Brutalist Design */
+/* Search Popup - Centered Modal Design */
+.search-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: overlayFadeIn 0.3s ease forwards;
+}
+
+[data-theme="light"] .search-popup-overlay {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .search-popup {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 380px;
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 640px;
+  max-width: 90vw;
   background: var(--bg-primary);
-  border: 2px solid var(--accent);
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   z-index: 1000;
-  animation: searchPopupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: visible;
+  animation: searchPopupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+}
+
+/* Decorative accent corner - Editorial Brutalist style */
+.search-popup-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  z-index: 1;
 }
 
 .search-popup.closing {
   animation: searchPopupFadeOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Decorative corner accent */
-.search-popup::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-left: 24px solid var(--accent);
-  border-bottom: 24px solid transparent;
-}
-
 @keyframes searchPopupFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.96);
+    transform: translateX(-50%) translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
 @keyframes searchPopupFadeOut {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0);
   }
   to {
     opacity: 0;
-    transform: translateY(-8px) scale(0.96);
+    transform: translateX(-50%) translateY(-10px);
   }
 }
 
@@ -1217,14 +1254,13 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  background: var(--bg-secondary);
+  padding: 20px 24px;
   border-bottom: 1px solid var(--border);
 }
 
 .search-popup-title {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--text-primary);
@@ -1234,50 +1270,47 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: none;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
+  border-radius: 50%;
 }
 
 .search-popup-close:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .search-popup-content {
-  padding: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 16px;
 }
 
 .search-popup-input-wrapper {
   position: relative;
-  margin-bottom: 16px;
-}
-
-.search-popup-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--accent);
-  pointer-events: none;
+  flex: 1;
+  min-width: 0;
 }
 
 .search-popup-input {
   width: 100%;
-  height: 48px;
-  padding: 0 16px 0 44px;
+  height: 40px;
+  padding: 0 0 8px 0;
   font-family: var(--font-body);
   font-size: 15px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--border);
   color: var(--text-primary);
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .search-popup-input::placeholder {
@@ -1286,22 +1319,78 @@ a:hover {
 }
 
 .search-popup-input:focus {
-  border-color: var(--accent);
-  background: var(--bg-primary);
-  box-shadow: 0 0 0 3px rgba(232, 255, 71, 0.1);
+  border-bottom-color: var(--accent);
 }
 
 .search-popup-filters {
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+  flex-shrink: 0;
+}
+
+/* Search popup filter menu - horizontal layout */
+.search-popup-filters .filter-menu.popup {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.search-popup-filters .filter-menu.popup .filter-menu-item {
+  margin-bottom: 0;
+}
+
+.search-popup-filters .filter-menu.popup .filter-menu-trigger {
+  padding: 8px;
+  font-size: 13px;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-popup-filters .filter-menu.popup .filter-menu-label {
+  display: none;
+}
+
+.search-popup-filters .filter-menu.popup .filter-menu-arrow {
+  display: none;
+}
+
+/* Search Submit Button - compact for horizontal layout */
+.search-popup-content .search-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-popup-content .search-submit-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* Filter Menu (Desktop & Popup) */
-.filter-menu.desktop,
-.filter-menu.popup {
+.filter-menu.desktop {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+}
+
+.filter-menu.popup {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .filter-menu-item {
@@ -1312,12 +1401,12 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-family: var(--font-mono);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: var(--bg-secondary);
+  background: transparent;
   border: 1px solid var(--border);
   color: var(--text-secondary);
   cursor: pointer;
@@ -1329,7 +1418,7 @@ a:hover {
 .filter-menu-trigger:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 .filter-menu-icon {
@@ -1356,14 +1445,15 @@ a:hover {
 
 .filter-menu-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 4px);
+  left: 0;
   right: 0;
-  min-width: 200px;
-  max-height: 280px;
+  min-width: 100%;
+  max-height: 240px;
   overflow-y: auto;
   background: var(--bg-primary);
-  border: 1px solid var(--accent);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   z-index: 1001;
   animation: filterMenuFadeIn 0.2s ease forwards;
 }
@@ -1382,7 +1472,7 @@ a:hover {
 .filter-menu-option {
   display: block;
   width: 100%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-family: var(--font-body);
   font-size: 14px;
   text-align: left;
@@ -1396,7 +1486,7 @@ a:hover {
 .filter-menu-option:hover {
   background: var(--bg-secondary);
   color: var(--accent);
-  padding-left: 18px;
+  padding-left: 20px;
 }
 
 .filter-menu-option.active {

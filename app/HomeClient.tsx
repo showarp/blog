@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/utils';
 import LiquidGradient from '@/components/LiquidGradient';
 import { useFilter } from '@/contexts/FilterContext';
 import { animate, stagger } from 'animejs';
+import TunnelBackground from '@/components/TunnelBackground';
 
 interface HomeClientProps {
   tags: string[];
@@ -175,7 +176,9 @@ function HomeMainContent({
     <>
       {/* Hero Section */}
       <section className="home-hero">
-        <LiquidGradient />
+        <TunnelBackground />
+        {/* Vignette overlay for text clarity */}
+        <div className="home-hero-vignette" />
         <div className="container home-hero-content-wrapper">
           <div className="home-hero-content">
             <p className="home-hero-eyebrow">Technical Blog</p>
@@ -325,7 +328,9 @@ function HomeFallback() {
     <>
       {/* Hero Section */}
       <section className="home-hero">
-        <LiquidGradient />
+        <TunnelBackground />
+        {/* Vignette overlay for text clarity */}
+        <div className="home-hero-vignette" />
         <div className="container home-hero-content-wrapper">
           <div className="home-hero-content">
             <p className="home-hero-eyebrow">Technical Blog</p>

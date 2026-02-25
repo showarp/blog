@@ -22,8 +22,16 @@ export default function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false)
   const [isInput, setIsInput] = useState(false)
 
-  // 根据主题设置光标颜色
-  const currentTheme = theme === 'system' ? resolvedTheme : theme
+  // 根据主题设置光标颜色 - 暗色主题用白色，亮色主题用黑色
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // 计算当前主题 - 优先使用 resolvedTheme
+  const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark'
+  // 强制暗色主题为白色，确保可见度
   const cursorColor = currentTheme === 'dark' ? '#ffffff' : '#1a1a1a'
 
   // 鼠标位置
@@ -68,6 +76,29 @@ export default function CustomCursor() {
         target.closest('textarea')
 
       if (isInputElement) {
+        setIsInput(true)
+        setIsHovering(false)
+        return
+      }
+
+      // 检测纯文本元素（非链接/按钮）- 显示竖条光标
+      const isTextElement =
+        target.tagName === 'P' ||
+        target.tagName === 'SPAN' ||
+        target.tagName === 'H1' ||
+        target.tagName === 'H2' ||
+        target.tagName === 'H3' ||
+        target.tagName === 'H4' ||
+        target.tagName === 'H5' ||
+        target.tagName === 'H6' ||
+        target.tagName === 'ARTICLE' ||
+        target.tagName === 'SECTION' ||
+        target.classList.contains('markdown-body') ||
+        target.classList.contains('post-content') ||
+        target.classList.contains('post-summary') ||
+        target.classList.contains('home-hero-subtitle')
+
+      if (isTextElement) {
         setIsInput(true)
         setIsHovering(false)
         return

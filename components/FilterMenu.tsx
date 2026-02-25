@@ -53,6 +53,7 @@ export default function FilterMenu({ tags, categories, variant = 'desktop' }: Fi
   };
 
   const isDesktop = variant === 'desktop';
+  const isPopup = variant === 'popup';
 
   // Toggle tag dropdown (and close category if opening)
   const toggleTagOpen = () => {
@@ -90,7 +91,7 @@ export default function FilterMenu({ tags, categories, variant = 'desktop' }: Fi
             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
-          <span className="filter-menu-label">{selectedTag || 'Tags'}</span>
+          {!isPopup && <span className="filter-menu-label">{selectedTag || 'Tags'}</span>}
           <svg className={`filter-menu-arrow ${tagOpen ? 'rotate' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -130,7 +131,7 @@ export default function FilterMenu({ tags, categories, variant = 'desktop' }: Fi
             <rect x="14" y="14" width="7" height="7"/>
             <rect x="3" y="14" width="7" height="7"/>
           </svg>
-          <span className="filter-menu-label">{selectedCategory || 'Category'}</span>
+          {!isPopup && <span className="filter-menu-label">{selectedCategory || 'Category'}</span>}
           <svg className={`filter-menu-arrow ${categoryOpen ? 'rotate' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
