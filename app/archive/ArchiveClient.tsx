@@ -9,6 +9,16 @@ export default function ArchiveClient() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Lock body scroll during loading
+  useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [loading]);
+
   useEffect(() => {
     fetch('/api/posts')
       .then(res => res.json())
@@ -31,11 +41,9 @@ export default function ArchiveClient() {
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="home-loading-wrapper">
-          <div className="loading-spinner" />
-          <p>Loading articles...</p>
-        </div>
+      <div className="page-loading-overlay">
+        <div className="loading-spinner" />
+        <p>Loading articles...</p>
       </div>
     );
   }

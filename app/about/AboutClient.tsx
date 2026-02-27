@@ -8,6 +8,16 @@ export default function AboutClient() {
   const [about, setAbout] = useState<AboutInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Lock body scroll during loading
+  useEffect(() => {
+    if (loading) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [loading]);
+
   useEffect(() => {
     fetch('/api/about')
       .then(res => res.json())
@@ -20,11 +30,9 @@ export default function AboutClient() {
 
   if (loading) {
     return (
-      <div className="container">
-        <div className="home-loading-wrapper">
-          <div className="loading-spinner" />
-          <p>Loading...</p>
-        </div>
+      <div className="page-loading-overlay">
+        <div className="loading-spinner" />
+        <p>Loading...</p>
       </div>
     );
   }
@@ -148,6 +156,9 @@ export default function AboutClient() {
           max-width: 600px;
           margin: 0 auto;
           line-height: 1.8;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: pre-wrap;
         }
         .about-contact {
           max-width: 500px;
