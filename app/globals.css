@@ -674,7 +674,7 @@ a:hover {
 
 .featured-post-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 48px rgba(232, 255, 71, 0.15);
   transform: translateY(-4px);
 }
 
@@ -817,7 +817,7 @@ a:hover {
 .post-card-masonry:hover {
   border-color: var(--accent);
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 32px rgba(232, 255, 71, 0.12);
 }
 
 [data-theme="light"] .post-card-masonry:hover {
@@ -929,7 +929,7 @@ a:hover {
 .post-card:hover {
   border-color: var(--accent);
   transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 32px rgba(232, 255, 71, 0.12);
 }
 
 [data-theme="light"] .post-card:hover {
@@ -1230,7 +1230,7 @@ a:hover {
   max-width: 90vw;
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(232, 255, 71, 0.08);
   z-index: 1000;
   animation: searchPopupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden;
@@ -1477,7 +1477,7 @@ a:hover {
   overflow-y: auto;
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(232, 255, 71, 0.06);
   z-index: 1001;
   animation: filterMenuFadeIn 0.2s ease forwards;
 }
